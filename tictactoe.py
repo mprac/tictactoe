@@ -3,6 +3,8 @@ Tic Tac Toe Player
 """
 
 import math
+import copy
+import sys
 
 X = "X"
 O = "O"
@@ -21,48 +23,138 @@ def initial_state():
 def player(board):
     """
     Returns player who has the next turn on a board.
-    """
     
-    raise NotImplementedError
+    1. Take a board state as input and return which players turn it is.
+    2. In the initial game state, X gets the first move. Subsequently, the player alternates with each additional move.
+    3. loop over list and count how many x and o on board. 
+    """
+    # Check if board is in initial_state
+    if board == initial_state():
+        return X 
+    else:
+        # Keep track of how many moves each player took
+        x_moves = 0
+        o_moves = 0
+        # Loop over board list and count how many XO moves
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] == X:
+                    x_moves += 1
+                elif board[i][j] == O:
+                    o_moves += 1
+        # If X has more moves its O's turn otherwise its X's turn
+        return O if x_moves > o_moves else X
 
 
 def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    raise NotImplementedError
+    # Initialize set
+    possible_actions = set()
+    # Loop over board to check for empty results 
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == EMPTY:
+                # Add tuple to set of possible actions
+                possible_actions.add((i,j))
+    
+    return possible_actions
 
 
 def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
+    1. If action is not a valid action for the board, your program should raise an exception.
+    2. original board should be left unmodified: since Minimax will ultimately require considering many different board states during its computation. This means that simply updating a cell in board itself is not a correct implementation of the result function. You’ll likely want to make a deep copy of the board first before making any changes.
     """
-    raise NotImplementedError
+    # Create a deep copy of board
+    boardcopy = copy.deepcopy(board)
+    # If action is not valid raise an exception
+    if action[0] or action[1] not in range(3):
+        raise Exception("Out of range")
+    else:
+        # Check if action is valid and assign players action
+        if boardcopy[action[0]][action[1]] == EMPTY:
+            boardcopy[action[0]][action[1]] = player(board)
+        else:
+            raise Exception("Not Empty")
+    # Return new board
+    return boardcopy
 
 
 def winner(board):
     """
     Returns the winner of the game, if there is one.
+    1. One can win the game with three of their moves in a row horizontally, vertically, or diagonally.
+    2. If there is no winner of the game (either because the game is in progress, or because it ended in a tie), the function should return None.
     """
-    raise NotImplementedError
+    #  return 0[[0EMPTY, 1EMPTY, 2EMPTY],
+    #         1[EMPTY, EMPTY, EMPTY],
+    #         2[EMPTY, EMPTY, EMPTY]]
+    # Check columns
+    if board[0][0] == board[1][0] and board[1][0] == board[2][0]:
+        return board[0][0]
+    elif board[0][1] == board[1][1] and board[1][1] == board[2][1]:
+        return board[0][1]
+    elif board[0][2] == board[1][2] and board[1][2] == board[2][2]:
+        return board[0][2]
+    # Check rows
+    elif all(i == board[0][0] for i in board[0]):
+        return board[0][0]
+    elif all(i == board[1][0] for i in board[1]):
+        return board[1][0]
+    elif all(i == board[2][0] for i in board[2]):
+        return board[2][0]
+    # Check diagonals
+    elif board[0][0] == board[1][1] and board[1][1] == board[2][2]:
+        return board[0][0]
+    elif board[0][2] == board[1][1] and board[1][1] == board[2][0]:
+        return board [0][2]
+    else:
+        return None    
 
 
 def terminal(board):
     """
     Returns True if game is over, False otherwise.
+    1. If the game is over, either because someone has won the game or because all cells have been filled without anyone winning, the function should return True.
     """
-    raise NotImplementedError
+    if any(None in x for x in board):
+        return False
+    else:
+        return True
+        
 
 
 def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
+    1.he utility function should accept a terminal board as input and output the utility of the board.
+    2.You may assume utility will only be called on a board if terminal(board) is True.
     """
-    raise NotImplementedError
+    if winner(board) is None:
+        return 0
+    elif winner(board) == X:
+        return 1
+    elif winner(board) == O:
+        return -1
+
+    
 
 
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
+
+    The minimax function should take a board as input, and return the optimal move for the player to move on that board.
+
+    1. The move returned should be the optimal action (i, j) that is one of the allowable actions on the board. If multiple moves are equally optimal, any of those moves is acceptable.
+    2. If the board is a terminal board, the minimax function should return None.
+    3. Alpha-beta pruning
     """
-    raise NotImplementedError
+  
+
+#testing
+if __name__ == '__main__':
+    globals()[sys.argv[1]](sys.argv[2])

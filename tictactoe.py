@@ -71,14 +71,10 @@ def result(board, action):
     # Create a deep copy of board
     boardcopy = copy.deepcopy(board)
     # If action is not valid raise an exception
-    if action[0] or action[1] not in range(3):
+    if action[0] not in range(3) or action[1] not in range(3):
         raise Exception("Out of range")
     else:
-        # Check if action is valid and assign players action
-        if boardcopy[action[0]][action[1]] == EMPTY:
-            boardcopy[action[0]][action[1]] = player(board)
-        else:
-            raise Exception("Not Empty")
+        boardcopy[action[0]][action[1]] = player(board)
     # Return new board
     return boardcopy
 
@@ -120,7 +116,7 @@ def terminal(board):
     Returns True if game is over, False otherwise.
     1. If the game is over, either because someone has won the game or because all cells have been filled without anyone winning, the function should return True.
     """
-    if any(None in x for x in board):
+    if any(None in x for x in board) and winner(board) is None:
         return False
     else:
         return True
@@ -152,8 +148,65 @@ def minimax(board):
     1. The move returned should be the optimal action (i, j) that is one of the allowable actions on the board. If multiple moves are equally optimal, any of those moves is acceptable.
     2. If the board is a terminal board, the minimax function should return None.
     3. Alpha-beta pruning
+
+    MAX(X) aims to maximize the score 
+    MIN(O) aims to minimize the score
     """
-  
+    if terminal(board):
+        return None
+    # return the optimal move for the player
+    # possible outcomes 1(X wins) 0(No winner) -1(O wins)
+    if player(board) == X:
+        _ , action = max_value(board)
+        return action
+    elif player(board) == O:
+        _ , action = min_value(board)
+        return action
+
+def max_value(board): # the X player wants to maximize the score
+    """
+    MAX picks action a in Actions(s) that produces the highest value of minValue(result(s,a))
+    """
+    if terminal(board):
+        return utility(board), None
+    else:
+        v = -math.inf
+        move = None
+        for action in actions(board):
+            val, _ = min_value(result(board, action))
+            # Check if returned Value is less than v if not return v and current action
+            if val > v:
+                # Assign v the maximum value for future evaluation
+                v = max(v,val)
+                # Keep track of action
+                move = action
+                # If best move then return it
+                if v == 1:
+                    return v, move
+        return v, move
+
+def min_value(board): # the O player wants to minimze the score
+    """
+    MIN picks action a in Actions(s) that produces the smallest value of Max-Value(result(s,a))
+    """
+    if terminal(board):
+        return utility(board), None
+    else:
+        v = math.inf
+        move = None
+        track = {}
+        for action in actions(board):
+            val, _ = max_value(result(board, action))
+            # Check if returned Value is less than v if not return v and current action
+            if val < v:
+                # Assign v the minimum value for future evaluation
+                v = min(v, val)
+                # Keep track of action
+                move = action
+                # If best move then return it
+                if v == -1:
+                    return v, move
+        return v, move
 
 #testing
 if __name__ == '__main__':
